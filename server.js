@@ -22,7 +22,13 @@ function validateSessionCookie(req, res, next) {
 }
 
 server.get("/", (req, res) => {
-  res.render("index", { API_KEY: API_KEY, test: "yay" });
+  session_key = req.cookies.session_key;
+  username = req.cookies.username;
+  if (session_key && username) {
+    res.redirect("home")
+  } else {
+    res.render("index", { API_KEY: API_KEY });
+  }
 })
 
 server.get("/login", async (req, res) => {
