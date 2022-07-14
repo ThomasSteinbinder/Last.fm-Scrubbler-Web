@@ -35,7 +35,7 @@ server.get("/login", async (req, res) => {
     let response = await axios.get(`http://ws.audioscrobbler.com/2.0/?method=auth.getSession&token=${token}&api_key=${API_KEY}&api_sig=${api_signature}&format=json`);
     const session = response.data.session;
     res.cookie("session_key", session.key)
-    // res.render("login")
+    res.cookie("username", session.name)
     res.redirect("home")
   } catch(err) {
     console.log(err)
@@ -44,12 +44,18 @@ server.get("/login", async (req, res) => {
 })
 
 server.get("/home", validateSessionCookie, (req, res) => {
-  res.render("home", {session_key:"42"});
+  session_key = req.cookies.session_key;
+  username = req.cookies.username;
+  if (session_key && username) {
+    res.render("home", {username: username});
+  } else {
+    res.redirect("index")
+  }
 })
 
 
 server.listen("3000", () => {
-  console.log("Running on port 3000")
+  console.log("Running on http://localhost:3000")
 })
 
 async function wait(ms) {
