@@ -57,7 +57,3 @@ server.get("/home", validateSessionCookie, (req, res) => {
 server.listen("3000", () => {
   console.log("Running on http://localhost:3000")
 })
-
-async function wait(ms) {
-  await new Promise(resolve => setTimeout(resolve, ms));
-}
