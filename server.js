@@ -1,3 +1,6 @@
+require("dotenv").config();
+console.log(process.env.API_KEY);
+
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const axios = require("axios");
@@ -8,8 +11,8 @@ const { render } = require("ejs");
 // const { execMap } = require("nodemon/lib/config/defaults");
 // const { acceptsCharset } = require("express/lib/request");
 
-const API_KEY = "e63f42bdfc9a9c68d07abda93767e5f2";
-const SECRET = "7603091c2684d07e1802a8aa0d9e1a40";
+const API_KEY = process.env.API_KEY;
+const SECRET = process.env.SECRET;
 
 const server = express();
 server.use(cookieParser());
