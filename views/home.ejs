@@ -1,15 +1,8 @@
 <p class="welcome">Hello <b>
     <%= username %>
   </b></p>
-<button type="button" onclick="logout()" class="btn btn-primary">Logout</button>
-
 
 <script>
-  function logout() {
-    document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "session_key=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    location.reload();
-  }
 </script>
 
 <style>

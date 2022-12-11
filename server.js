@@ -14,12 +14,12 @@ const SECRET = "7603091c2684d07e1802a8aa0d9e1a40";
 const server = express();
 server.use(cookieParser());
 server.use(expressLayouts);
-server.set("layout", "./layouts/default.ejs")
+server.set("layout", "./layouts/default");
 server.set("view engine", "ejs");
+server.use(express.static("./public"));
 
 
-async function validateSessionCookie(req, res, next) {
-  const cookies = req.cookies;
+async function validateSession(req, res, next) {
   const session_key = req.cookies.session_key;
   const username = req.cookies.username;
   const user = await getLastFmUser(session_key);
@@ -30,10 +30,6 @@ async function validateSessionCookie(req, res, next) {
     res.clearCookie("username");
     res.redirect("/")
   }
-}
-
-function getUserFromRequest(req) {
-  session_key = req.cookies.session_key;
 }
 
 async function getLastFmUser(session_key) {
@@ -54,7 +50,7 @@ server.get("/", (req, res) => {
     res.redirect("home")
   } else {
     console.log("/ to index")
-    res.render("index", { API_KEY: API_KEY });
+    res.render("index", { API_KEY: API_KEY, layout: "layouts/index" });
   }
 })
 
@@ -76,14 +72,15 @@ server.get("/login", async (req, res) => {
   }
 })
 
-server.get("/home", validateSessionCookie, (req, res) => {
+server.get("/home", validateSession, (req, res) => {
   const username = req.cookies.username;
   res.render("home", { username: username });
 })
 
-server.get("/me", (req, res) => {
-  getLastFmUser();
-  res.render("home", { username: "test" })
+server.get("/me", validateSession, async (req, res) => {
+  const session_key = req.cookies.session_key;
+  const user = await getLastFmUser(session_key);
+  res.send(user);
 })
 
 
