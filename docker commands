@@ -1,0 +1,8 @@
+sudo docker login --username=thomassteinbinder --password=??? cloud.canister.io:5000
+
+sudo docker build --tag scrubbler .
+sudo docker image tag scrubbler:latest cloud.canister.io:5000/thomassteinbinder/scrubbler:latest
+sudo docker image push cloud.canister.io:5000/thomassteinbinder/scrubbler
+
+sudo docker pull cloud.canister.io:5000/thomassteinbinder/scrubbler
+sudo docker run --publish 80:3000 --env-file ./.env -d cloud.canister.io:5000/thomassteinbinder/scrubbler
