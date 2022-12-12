@@ -13,6 +13,7 @@ const { render } = require("ejs");
 
 const API_KEY = process.env.API_KEY;
 const SECRET = process.env.SECRET;
+const HOST = process.env.HOST;
 
 const server = express();
 server.use(cookieParser());
@@ -35,6 +36,12 @@ async function validateSession(req, res, next) {
   }
 }
 
+function getLastFmObjectFrom(req) {
+  const sessionKey = req.cookies.session_key;
+  const lastFm = new LastFm(API_KEY, SECRET, sessionKey)
+  return lastFm;
+}
+
 async function getLastFmUser(session_key) {
   try {
     const lastFm = new LastFm(API_KEY, SECRET, session_key);
@@ -53,7 +60,7 @@ server.get("/", (req, res) => {
     res.redirect("home")
   } else {
     console.log("/ to index")
-    res.render("index", { API_KEY: API_KEY, layout: "layouts/index" });
+    res.render("index", { API_KEY: API_KEY, REDIRECT_URL: `${HOST}/login`, layout: "layouts/index" });
   }
 })
 
@@ -86,7 +93,16 @@ server.get("/me", validateSession, async (req, res) => {
   res.send(user);
 })
 
+server.get("/latestTracks", validateSession, async (req, res) => {
+  const lastFm = getLastFmObjectFrom(req);
+  const data = await lastFm.userGetRecentTracks({
+    user: req.cookies.username,
+    limit: 15
+  });
+  res.send(data);
+})
 
-server.listen("3000", () => {
-  console.log("Running on http://localhost:3000")
+
+server.listen(3000, () => {
+  console.log("Running on http://localhost:3000");
 })

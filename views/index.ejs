@@ -1,5 +1,12 @@
 <div class="container">
   <h1>Last.fm Web Scrubbler</h1>
-  <a class="btn btn-primary" href="https://www.last.fm/api/auth?api_key=<%= API_KEY %>&cb=http://localhost:3000/login"
+  <a id="loginBtn" onclick="login()" class="btn btn-primary" href=""
     role="button">Login via Last.fm</a>
 </div>
+
+<script>
+  function login() {
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn.href = "https://www.last.fm/api/auth?api_key=<%= API_KEY %>&cb=<%= REDIRECT_URL %>"
+  }
+</script>
