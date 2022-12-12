@@ -47,7 +47,7 @@
         </ul>
         <form class="d-flex">
           <button class="btn" onclick="logout()" type="submit">Logout</button>
-          <a id="profileLink" href="#" target="_blank">
+          <a id="profileLink" target="_blank">
             <img id="profileImage" class="avatar" src="img/avatar.png" alt="">
           </a>
 
@@ -81,10 +81,10 @@ async function onLoad() {
 
 async function fetchUser() {
     try {
-      const response = await axios.get("http://localhost:3000/me");
+      const response = await axios.get(`http://${window.location.host}/me`);
       const user = response.data;
       profileImage = document.getElementById("profileImage");
-      profileImage.src = user.image[1]["#text"] || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+      profileImage.src = user.image[1]["#text"] || "img/avatar.png";
       profileLink = document.getElementById("profileLink");
       profileLink.href = user.url;
     } catch (err) {
