@@ -7,13 +7,12 @@ const axios = require("axios");
 const LastFm = require("lastfm-node-client");
 const md5 = require("md5");
 const expressLayouts = require("express-ejs-layouts");
-const { render } = require("ejs");
-// const { execMap } = require("nodemon/lib/config/defaults");
-// const { acceptsCharset } = require("express/lib/request");
+const auth = require("./authentication");
 
-const API_KEY = process.env.API_KEY;
-const SECRET = process.env.SECRET;
-const HOST = process.env.HOST;
+
+API_KEY = process.env.API_KEY;
+SECRET = process.env.SECRET;
+HOST = process.env.HOST;
 
 const server = express();
 server.use(cookieParser());
@@ -22,35 +21,6 @@ server.set("layout", "./layouts/default");
 server.set("view engine", "ejs");
 server.use(express.static("./public"));
 
-
-async function validateSession(req, res, next) {
-  const session_key = req.cookies.session_key;
-  const username = req.cookies.username;
-  const user = await getLastFmUser(session_key);
-  if (user && username == user.name) {
-    next();
-  } else {
-    res.clearCookie("session_key");
-    res.clearCookie("username");
-    res.redirect("/")
-  }
-}
-
-function getLastFmObjectFrom(req) {
-  const sessionKey = req.cookies.session_key;
-  const lastFm = new LastFm(API_KEY, SECRET, sessionKey)
-  return lastFm;
-}
-
-async function getLastFmUser(session_key) {
-  try {
-    const lastFm = new LastFm(API_KEY, SECRET, session_key);
-    const user = await lastFm.userGetInfo();
-    return user.user;
-  } catch (err) {
-    return null;
-  }
-}
 
 server.get("/", (req, res) => {
   const session_key = req.cookies.session_key;
@@ -82,19 +52,19 @@ server.get("/login", async (req, res) => {
   }
 })
 
-server.get("/home", validateSession, (req, res) => {
+server.get("/home", auth.validateSession, (req, res) => {
   const username = req.cookies.username;
   res.render("home", { username: username });
 })
 
-server.get("/me", validateSession, async (req, res) => {
+server.get("/me", auth.validateSession, async (req, res) => {
   const session_key = req.cookies.session_key;
-  const user = await getLastFmUser(session_key);
+  const user = await auth.getLastFmUser(session_key);
   res.send(user);
 })
 
-server.get("/latestTracks", validateSession, async (req, res) => {
-  const lastFm = getLastFmObjectFrom(req);
+server.get("/latestTracks", auth.validateSession, async (req, res) => {
+  const lastFm = auth.getLastFmObjectFrom(req);
   const data = await lastFm.userGetRecentTracks({
     user: req.cookies.username,
     limit: 15
