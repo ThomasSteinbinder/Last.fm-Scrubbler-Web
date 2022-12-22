@@ -23,7 +23,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav me-auto">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="Home">Home</a>
           </li>
@@ -45,15 +45,19 @@
             </ul>
           </li>
         </ul>
-        <form class="d-flex">
-          <button class="btn" onclick="logout()" type="submit">Logout</button>
+        <div class="d-flex">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a onclick="logout()" class="nav-link active" href="" aria-current="page">Logout</a>
+            </li>
+          </ul>
           <a id="profileLink" target="_blank">
             <img id="profileImage" class="avatar" src="img/avatar.png" alt="">
           </a>
 
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
   </nav>
   <div class="container">
     <%- body %>
@@ -64,22 +68,22 @@
 
 <style>
   .avatar {
-  vertical-align: middle;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-}
+    vertical-align: middle;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+  }
 </style>
 
 <script>
   onLoad();
 
 
-async function onLoad() {
-  fetchUser();
-}
+  async function onLoad() {
+    fetchUser();
+  }
 
-async function fetchUser() {
+  async function fetchUser() {
     try {
       const response = await axios.get(`http://${window.location.host}/me`);
       const user = response.data;
@@ -92,7 +96,7 @@ async function fetchUser() {
     }
   }
 
-function logout() {
+  function logout() {
     document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "session_key=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     location.reload();
