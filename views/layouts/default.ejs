@@ -27,21 +27,18 @@
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="Home">Home</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
               aria-expanded="false">
-              Dropdown
+              Scrobble
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Eins</a></li>
-              <li><a class="dropdown-item" href="#">Zwei</a></li>
-              <li>
+              <li><a class="dropdown-item" href="singleTrack">Single Track</a></li>
+              <li><a class="dropdown-item" href="fromFile">From File</a></li>
+              <!-- <li>
                 <hr class="dropdown-divider">
-              </li>
-              <li><a class="dropdown-item" href="#">Drei</a></li>
+              </li> -->
+              <li><a class="dropdown-item" href="friendScrobble">Friend Scrobble</a></li>
             </ul>
           </li>
         </ul>
@@ -83,16 +80,37 @@
     fetchUser();
   }
 
+  function getCookie(cname) {
+    let name = cname + "=";
+    let decodedCookie = decodeURIComponent(document.cookie);
+    let ca = decodedCookie.split(';');
+    for (let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+  }
+
   async function fetchUser() {
     try {
-      const response = await axios.get(`http://${window.location.host}/me`);
-      const user = response.data;
+      let user = JSON.parse(localStorage.getItem('user'));
+      const usernameCookie = getCookie("username")
+      if (!user || user.name != usernameCookie) {
+        const response = await axios.get(`http://${window.location.host}/me`);
+        user = response.data;
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
       profileImage = document.getElementById("profileImage");
       profileImage.src = user.image[1]["#text"] || "img/avatar.png";
       profileLink = document.getElementById("profileLink");
       profileLink.href = user.url;
     } catch (err) {
-      console.log(err);
     }
   }
 

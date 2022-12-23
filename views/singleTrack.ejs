@@ -1,0 +1,140 @@
+<h4 class="my-4">
+  Scrobble a single Track
+</h4>
+<div class="row">
+  <div class="col-12 col-md-6">
+    <div class="mb-3">
+      <label for="artist" class="form-label">Artist *</label>
+      <input type="text" class="form-control" id="artist" placeholder="Artist">
+    </div>
+  </div>
+  <div class="col-12 col-md-6">
+    <div class="mb-3">
+      <label for="track" class="form-label">Track *</label>
+      <input type="text" class="form-control" id="track" placeholder="Track">
+    </div>
+  </div>
+</div>
+
+<div class="accordion" id="accordionOptionals">
+  <div class="accordion-item">
+    <h2 class="accordion-header" id="accordionOptionalsHeading">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+        data-bs-target="#accodion-collapse" aria-expanded="false" aria-controls="accodion-collapse">
+        Optional data
+      </button>
+    </h2>
+    <div id="accodion-collapse" class="accordion-collapse collapse" aria-labelledby="accordionOptionalsHeading"
+      data-bs-parent="#accordionOptionals">
+      <div class="accordion-body">
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <div class="mb-3">
+              <label for="album" class="form-label">Album</label>
+              <input type="text" class="form-control" id="album" placeholder="Album">
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="mb-3">
+              <label for="albumArtist" class="form-label">Album Artist</label>
+              <input type="text" class="form-control" id="albumArtist" placeholder="Album Artist">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <div class="mb-3">
+              <label for="duration" class="form-label">Duration (seconds)</label>
+              <input type="number" class="form-control" id="duration" placeholder="Duration (seconds)">
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="mb-3">
+              <label for="date" class="form-label">Scrobble date</label>
+              <input type="date" class="form-control" id="date" placeholder="Date">
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <div class="mb-3">
+              <label for="time" class="form-label">Scrobble time</label>
+              <input type="time" class="form-control" id="time" placeholder="Scrobble time">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="scrobbleSuccess" class="alert alert-success mt-4" role="alert" style="display: none">
+  Successfully scrobbled track!
+</div>
+<div id="scrobbleError" class="alert alert-danger mt-4" role="alert" style="display: none">
+  Error scrobbling track!
+</div>
+
+<button class="btn btn-lg mt-4" onclick="scrobbleTrack()" id="scrobbleBtn"
+  style="background-color: #d92323; color: white;">
+  <b id="scrobbleText">Scrobble</b>
+  <div id="scrobbleSpinner" style="display: none" class="spinner-border text-light" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</button>
+
+<script src="./scripts/time.js"></script>
+
+<script>
+  prefillFormDate();
+
+  function prefillFormDate() {
+    let now = new Date();
+    const nowLocal = timeUtils.localTime(now)
+    const today = nowLocal.toISOString().substring(0, 10);
+    const time = nowLocal.toISOString().substring(11, 16);
+    document.getElementById("date").value = today;
+    document.getElementById("time").value = time;
+  }
+
+  async function scrobbleTrack() {
+    const d = document.getElementById("date").value
+    const t = document.getElementById("time").value
+    const dateTime = new Date(`${d}T${t}`);
+
+    const timestamp = Math.floor(dateTime.getTime() / 1000);
+    const artist = document.getElementById("artist").value;
+    const track = document.getElementById("track").value;
+    const album = document.getElementById("album").value;
+    const albumArtist = document.getElementById("albumArtist").value;
+    const duration = document.getElementById("duration").value;
+
+    document.getElementById("scrobbleBtn").disabled = true;
+    document.getElementById("scrobbleText").style.display = "none";
+    document.getElementById("scrobbleSpinner").style.display = "block";
+    document.getElementById("scrobbleSuccess").style.display = "none";
+    document.getElementById("scrobbleError").style.display = "none";
+
+    try {
+      const response = await axios.put("/scrobble", {
+        artist: artist,
+        album: album,
+        track: track,
+        albumArtist: albumArtist,
+        duration: duration,
+        timestamp: timestamp,
+      })
+      document.getElementById("scrobbleSuccess").style.display = "block";
+    } catch {
+      document.getElementById("scrobbleError").style.display = "block";
+    }
+    document.getElementById("scrobbleBtn").disabled = false;
+    document.getElementById("scrobbleText").style.display = "block";
+    document.getElementById("scrobbleSpinner").style.display = "none";
+  }
+
+</script>

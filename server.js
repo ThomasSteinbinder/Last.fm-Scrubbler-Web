@@ -1,13 +1,14 @@
 require("dotenv").config();
-console.log(process.env.API_KEY);
 
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const bodyParser = require('body-parser')
 const axios = require("axios");
 const LastFm = require("lastfm-node-client");
 const md5 = require("md5");
 const expressLayouts = require("express-ejs-layouts");
 const auth = require("./authentication");
+const utils = require("./utils")
 
 
 API_KEY = process.env.API_KEY;
@@ -20,16 +21,15 @@ server.use(expressLayouts);
 server.set("layout", "./layouts/default");
 server.set("view engine", "ejs");
 server.use(express.static("./public"));
+const jsonParser = bodyParser.json()
 
 
 server.get("/", (req, res) => {
   const session_key = req.cookies.session_key;
   const username = req.cookies.username;
   if (session_key && username) {
-    console.log("/ to home")
     res.redirect("home")
   } else {
-    console.log("/ to index")
     res.render("index", { API_KEY: API_KEY, REDIRECT_URL: `${HOST}/login`, layout: "layouts/index" });
   }
 })
@@ -63,6 +63,18 @@ server.get("/me", auth.validateSession, async (req, res) => {
   res.send(user);
 })
 
+server.get("/singleTrack", auth.validateSession, (req, res) => {
+  res.render("singleTrack");
+})
+
+server.get("/fromFile", auth.validateSession, (req, res) => {
+  res.render("scrobbleFromFile");
+})
+
+server.get("/friendScrobble", auth.validateSession, (req, res) => {
+  res.render("scrobbleFromFriend");
+})
+
 server.get("/latestTracks", auth.validateSession, async (req, res) => {
   const lastFm = auth.getLastFmObjectFrom(req);
   const data = await lastFm.userGetRecentTracks({
@@ -70,6 +82,24 @@ server.get("/latestTracks", auth.validateSession, async (req, res) => {
     limit: 15
   });
   res.send(data);
+})
+
+server.put("/scrobble", jsonParser, auth.validateSession, async (req, res) => {
+  let scrobbleData = req.body;
+  scrobbleData = utils.removeEmptyPropsFrom(scrobbleData);
+  try {
+    lastFm = auth.getLastFmObjectFrom(req);
+    const response = await lastFm.trackScrobble(
+      scrobbleData
+    );
+    if (response.scrobbles["@attr"].accepted != 1) {
+      throw "scrobble not ok"
+    }
+    res.send("okay")
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400)
+  }
 })
 
 
