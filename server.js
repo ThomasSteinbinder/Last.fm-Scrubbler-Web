@@ -79,7 +79,7 @@ server.get("/latestTracks", auth.validateSession, async (req, res) => {
   const lastFm = auth.getLastFmObjectFrom(req);
   const data = await lastFm.userGetRecentTracks({
     user: req.cookies.username,
-    limit: 15
+    limit: 9
   });
   res.send(data);
 })

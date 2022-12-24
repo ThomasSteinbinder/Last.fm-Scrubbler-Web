@@ -1,11 +1,100 @@
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
 <p class="welcome mt-3">Welcome
   <b>
     <%= username %>
   </b>
 </p>
 
-<style>
-  .welcome {
-    font-size: 1.5rem;
-  }
-</style>
+<div class="row">
+  <div class="col">
+    <div class="mt-2 mt-sm-0 card text-center">
+      <div class="card-body">
+        <h2 class="card-title text-blue" id="scrobbleLabel">?</h2>
+        <i class="bi-music-note-beamed" style="font-size: 3rem; color: cornflowerblue;"></i>
+        <p class="card-text">Scrobbles</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="mt-2 mt-sm-0 card text-center">
+      <div class="card-body">
+        <h2 class="card-title" id="albumLabel">?</h2>
+        <i class="bi-disc" style="font-size: 3rem; color: cornflowerblue;"></i>
+        <p class="card-text">Albums</p>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="mt-2 mt-sm-0 card text-center">
+      <div class="card-body">
+        <h2 class="card-title" id="artistLabel">?</h2>
+        <i class="bi-people-fill" style="font-size: 3rem; color: cornflowerblue;"></i>
+        <p class="card-text">Artists</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4 class="mt-4">Recent Scrobbles</h3>
+
+  <div class="row mt-3">
+    <div class="col">
+      <table class="table table-striped">
+        <tbody id="scrobbleTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <style>
+    .welcome {
+      font-size: 1.5rem;
+    }
+  </style>
+
+  <script>
+    onLoad()
+
+    function onLoad() {
+      fillStats();
+      getLastTracks();
+    }
+
+    async function getLastTracks() {
+      try {
+        const response = await axios.get(`http://${window.location.host}/latestTracks`);
+        const tracks = response.data.recenttracks.track;
+        const table = document.getElementById("scrobbleTable");
+        tracks.forEach(track => {
+          var img = document.createElement('img');
+          img.src = track.image[0]["#text"];
+
+          let row = table.insertRow();
+          var cell1 = row.insertCell(0);
+          var cell2 = row.insertCell(1);
+          var cell3 = row.insertCell(2);
+
+          cell1.appendChild(img);
+          
+          cell2.innerHTML = track.name;
+          cell3.innerHTML = `<small class="text-muted">${track.artist["#text"]}</small>`;
+          cell1.style = "width: 65px;"
+          cell2.style = "width: 300px; max-width: 300px;"
+          cell2.class= "text-muted";
+          
+        });
+      } catch {
+        console.log("tracks err")
+      }
+    }
+
+    function fillStats() {
+      let user = JSON.parse(localStorage.getItem('user'));
+      if (user) {
+        document.getElementById("scrobbleLabel").innerHTML = user.playcount;
+        document.getElementById("albumLabel").innerHTML = user.album_count;
+        document.getElementById("artistLabel").innerHTML = user.artist_count;
+      }
+    }
+  </script>
