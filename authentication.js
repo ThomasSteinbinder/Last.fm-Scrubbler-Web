@@ -21,6 +21,7 @@ async function validateSession(req, res, next) {
   const username = req.cookies.username;
   const user = await getLastFmUser(session_key);
   if (user && username == user.name) {
+    res.cookie("user", JSON.stringify(user));
     next();
   } else {
     res.clearCookie("session_key");

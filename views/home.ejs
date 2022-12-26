@@ -90,7 +90,7 @@
     }
 
     function fillStats() {
-      let user = JSON.parse(localStorage.getItem('user'));
+      let user = JSON.parse(cookies.getCookie('user'));
       if (user) {
         document.getElementById("scrobbleLabel").innerHTML = user.playcount;
         document.getElementById("albumLabel").innerHTML = user.album_count;
