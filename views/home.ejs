@@ -73,14 +73,17 @@
           var cell1 = row.insertCell(0);
           var cell2 = row.insertCell(1);
           var cell3 = row.insertCell(2);
+          var cell4 = row.insertCell(3);
 
           cell1.appendChild(img);
           
           cell2.innerHTML = track.name;
           cell3.innerHTML = `<small class="text-muted">${track.artist["#text"]}</small>`;
           cell1.style = "width: 65px;"
-          cell2.style = "width: 300px; max-width: 300px;"
+          cell2.style = "width: 420px; max-width: 420px;"
           cell2.class= "text-muted";
+          cell4.innerHTML = `<a href="${track.url}" target="_blank"><i class="bi-arrow-up-right" style="font-size: 1.4rem; color: black;"></i></a>`
+          cell4.style = "text-align: right;"
           
         });
       } catch {
