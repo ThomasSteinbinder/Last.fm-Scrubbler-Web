@@ -63,6 +63,10 @@ server.get("/me", auth.validateSession, async (req, res) => {
   res.send(user);
 })
 
+server.get("/about", async(req, res) => {
+  res.render("about")
+})
+
 server.get("/singleTrack", auth.validateSession, (req, res) => {
   res.render("singleTrack");
 })
