@@ -1,0 +1,29 @@
+<footer class="bg-light footer mt-auto">
+    <ul class="nav justify-content-center border-bottom py-2 my-2">
+        <li class="nav-item"><a href="about" class="nav-link px-3 text-muted whiteable">About</a></li>
+        <li class="nav-item"><a href="https://github.com/ThomasSteinbinder/Last.fm-Scrubbler-Web" target="_blank"
+                class="nav-link px-3 text-muted whiteable">Show on Github</a></li>
+        <li class="nav-item px-3">
+            <form class="nav-link" action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="KLQQ7F35EV7M4" />
+                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0"
+                    name="submit" title="PayPal - The safer, easier way to pay online!"
+                    alt="Donate with PayPal button" />
+                <img alt="" border="0" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1" height="1" />
+            </form>
+        </li>
+    </ul>
+    <p class="text-center text-muted whiteable">&copy; 2022 Thomas Steinbinder</p>
+</footer>
+
+<% if (locals.dark) { %>
+    <script>
+        const items = document.getElementsByClassName("whiteable");
+        for (const item of items) {
+            item.classList.add("text-white")
+            item.classList.remove("text-muted")
+        }
+        const footer = document.getElementsByTagName("footer");
+        footer[0].classList.add("bg-dark")
+    </script>
+    <%}%>

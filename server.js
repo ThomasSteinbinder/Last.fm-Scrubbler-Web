@@ -25,88 +25,92 @@ const jsonParser = bodyParser.json()
 
 
 server.get("/", (req, res) => {
-  const session_key = req.cookies.session_key;
-  const username = req.cookies.username;
-  if (session_key && username) {
-    res.redirect("home")
-  } else {
-    res.render("index", { API_KEY: API_KEY, REDIRECT_URL: `${HOST}/login`, layout: "layouts/index" });
-  }
+    const session_key = req.cookies.session_key;
+    const username = req.cookies.username;
+    if (session_key && username) {
+        res.redirect("home")
+    } else {
+        res.render("index", { API_KEY: API_KEY, REDIRECT_URL: `${HOST}/login`, layout: "layouts/index" });
+    }
 })
 
 server.get("/login", async (req, res) => {
-  const token = req.query.token;
-  if (!token) {
-    res.render("error", { error: "Couldn't login" })
-  }
-  const api_signature = md5(`api_key${API_KEY}methodauth.getSessiontoken${token}${SECRET}`)
-  try {
-    let response = await axios.get(`http://ws.audioscrobbler.com/2.0/?method=auth.getSession&token=${token}&api_key=${API_KEY}&api_sig=${api_signature}&format=json`);
-    const session = response.data.session;
-    res.cookie("session_key", session.key)
-    res.cookie("username", session.name)
-    res.redirect("home")
-  } catch (err) {
-    console.log(err)
-    res.render("error", { error: "Couldn't login" })
-  }
+    const token = req.query.token;
+    if (!token) {
+        res.render("error", { error: "Couldn't login" })
+    }
+    const api_signature = md5(`api_key${API_KEY}methodauth.getSessiontoken${token}${SECRET}`)
+    try {
+        let response = await axios.get(`http://ws.audioscrobbler.com/2.0/?method=auth.getSession&token=${token}&api_key=${API_KEY}&api_sig=${api_signature}&format=json`);
+        const session = response.data.session;
+        res.cookie("session_key", session.key)
+        res.cookie("username", session.name)
+        res.redirect("home")
+    } catch (err) {
+        console.log(err)
+        res.render("error", { error: "Couldn't login" })
+    }
 })
 
 server.get("/home", auth.validateSession, (req, res) => {
-  const username = req.cookies.username;
-  res.render("home", { username: username });
+    const username = req.cookies.username;
+    res.render("home", { username: username });
 })
 
 server.get("/me", auth.validateSession, async (req, res) => {
-  const session_key = req.cookies.session_key;
-  const user = await auth.getLastFmUser(session_key);
-  res.send(user);
+    const session_key = req.cookies.session_key;
+    const user = await auth.getLastFmUser(session_key);
+    res.send(user);
 })
 
-server.get("/about", async(req, res) => {
-  res.render("about")
+server.get("/about", async (req, res) => {
+    if (await auth.isAuthenticated(req)) {
+        res.render("about")
+    } else {
+        res.render("about", { layout: "./layouts/index" })
+    }
 })
 
 server.get("/singleTrack", auth.validateSession, (req, res) => {
-  res.render("singleTrack");
+    res.render("singleTrack");
 })
 
 server.get("/fromFile", auth.validateSession, (req, res) => {
-  res.render("scrobbleFromFile");
+    res.render("scrobbleFromFile");
 })
 
 server.get("/friendScrobble", auth.validateSession, (req, res) => {
-  res.render("scrobbleFromFriend");
+    res.render("scrobbleFromFriend");
 })
 
 server.get("/latestTracks", auth.validateSession, async (req, res) => {
-  const lastFm = auth.getLastFmObjectFrom(req);
-  const data = await lastFm.userGetRecentTracks({
-    user: req.cookies.username,
-    limit: 9
-  });
-  res.send(data);
+    const lastFm = auth.getLastFmObjectFrom(req);
+    const data = await lastFm.userGetRecentTracks({
+        user: req.cookies.username,
+        limit: 9
+    });
+    res.send(data);
 })
 
 server.put("/scrobble", jsonParser, auth.validateSession, async (req, res) => {
-  let scrobbleData = req.body;
-  scrobbleData = utils.removeEmptyPropsFrom(scrobbleData);
-  try {
-    lastFm = auth.getLastFmObjectFrom(req);
-    const response = await lastFm.trackScrobble(
-      scrobbleData
-    );
-    if (response.scrobbles["@attr"].accepted != 1) {
-      throw "scrobble not ok"
+    let scrobbleData = req.body;
+    scrobbleData = utils.removeEmptyPropsFrom(scrobbleData);
+    try {
+        lastFm = auth.getLastFmObjectFrom(req);
+        const response = await lastFm.trackScrobble(
+            scrobbleData
+        );
+        if (response.scrobbles["@attr"].accepted != 1) {
+            throw "scrobble not ok"
+        }
+        res.send("okay")
+    } catch (err) {
+        console.log(err);
+        res.sendStatus(400)
     }
-    res.send("okay")
-  } catch (err) {
-    console.log(err);
-    res.sendStatus(400)
-  }
 })
 
 
 server.listen(3000, () => {
-  console.log("Running on http://localhost:3000");
+    console.log("Running on http://localhost:3000");
 })
