@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100">
+<html lang="en" class="h-100 bg-dark">
 
 <head>
     <meta charset="UTF-8">
@@ -19,4 +19,13 @@
 
 <%- include("../partials/footer.ejs", { dark: true }) %>
 
+
 </html>
+
+<script>
+    if (window.innerHeight > window.innerWidth) {
+        document.getElementsByTagName("body")[0].classList.remove("d-flex");
+    } else {
+        document.getElementsByTagName("body")[0].classList.add("d-flex");
+    }
+</script>
