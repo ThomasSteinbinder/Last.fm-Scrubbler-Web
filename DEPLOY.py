@@ -19,9 +19,9 @@ def deploy():
 def pull_and_run():
     print("Pulling...")
     print("Stop running containers...")
-    subprocess.call('sudo docker stop $(sudo docker ps -a -q)', shell=True)
+    subprocess.call('sudo docker stop $(sudo docker ps -f ancestor=cloud.canister.io:5000/thomassteinbinder/scrubbler -q)', shell=True)
     print("Remove all containers...")
-    subprocess.call('sudo docker rm $(sudo docker ps -a -q)', shell=True)
+    subprocess.call('sudo docker rm $(sudo docker ps -f ancestor=cloud.canister.io:5000/thomassteinbinder/scrubbler -q)', shell=True)
     print("Pulling latest image...")
     subprocess.call(["sudo", "docker", "pull", "cloud.canister.io:5000/thomassteinbinder/scrubbler"])
     print("Starting container...")
