@@ -60,7 +60,15 @@
       getLastTracks();
     }
 
-    function getLocalScrobbleDateString(scrobbleDateUnix) {
+    function getLocalScrobbleDateString(track) {
+      const scrobbleDateUnix = track.date?.uts
+      if (!scrobbleDateUnix) {
+        if (track["@attr"]?.nowplaying) {
+          return "now playing...";
+        } else {
+          return "unknown";
+        }
+      }
       let scrobbleDate = new Date(scrobbleDateUnix * 1000);
       const scrobbleDateLocal = timeUtils.localTime(scrobbleDate)
       const scrobbleDateString = `${scrobbleDateLocal.toISOString().substring(0, 10)} ${scrobbleDateLocal.toISOString().substring(11, 16)}`
@@ -73,7 +81,8 @@
         const tracks = response.data.recenttracks.track;
         const table = document.getElementById("scrobbleTable");
         tracks.forEach(track => {
-          const scrobbleDate = getLocalScrobbleDateString(track.date.uts)
+          const scrobbleDate = getLocalScrobbleDateString(track);
+
           var img = document.createElement('img');
           img.src = track.image[0]["#text"];
           let row = table.insertRow();
@@ -99,8 +108,8 @@
           cell5.innerHTML = `<a href="${track.url}" target="_blank"><i class="bi-arrow-up-right" style="font-size: 1.4rem; color: black;"></i></a>`
           cell5.style = "text-align: right;"
         });
-      } catch {
-        console.log("tracks err")
+      } catch (err) {
+        console.log(err)
       }
     }
 
