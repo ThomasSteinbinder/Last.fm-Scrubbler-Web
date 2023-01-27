@@ -77,7 +77,7 @@
 
     async function getLastTracks() {
       try {
-        const response = await axios.get(`http://${window.location.host}/latestTracks`);
+        const response = await axios.get(`${window.location.protocol}//${window.location.host}/latestTracks`);
         const tracks = response.data.recenttracks.track;
         const table = document.getElementById("scrobbleTable");
         tracks.forEach(track => {
