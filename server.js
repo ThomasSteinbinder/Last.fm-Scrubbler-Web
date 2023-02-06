@@ -165,7 +165,6 @@ server.put("/scrobbleBatch", jsonParser, auth.validateSession, async (req, res) 
     const response = await lastFm.trackScrobbleMany(
       scrobbleData
     );
-    console.log(response);
     if (response.scrobbles["@attr"].accepted != scrobbleData.length) {
       throw "scrobble not ok"
     }
