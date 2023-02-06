@@ -1,0 +1,160 @@
+<h4 class="my-3">
+  <img class="avatarBig" src="<%= user.image[1]['#text'] ? user.image[1]['#text'] : '/img/avatar.png' %>" alt="">
+  <%= user.name %>'s scrobbles
+</h4>
+
+<div class="mt-4">
+  <button class="btn" onclick="scrobbleTracks()" id="scrobbleBtn" style="background-color: #d92323; color: white;">
+    <b id="scrobbleText">Scrobble selected tracks</b>
+    <div id="scrobbleSpinner" style="display: none" class="spinner-border text-light" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </button>
+  <button class="btn float-end btn-primary" onclick="selectAllTracks()">Select All</button>
+  <button class="btn float-end me-2 btn-primary" onclick="deselectAllTracks()">Deselect All</button>
+</div>
+
+<div id="scrobbleSuccess" class="alert alert-success mt-4" role="alert" style="display: none">
+  Successfully scrobbled tracks!
+</div>
+<div id="scrobbleError" class="alert alert-danger mt-4" role="alert" style="display: none">
+  Error scrobbling tracks!
+</div>
+
+<div class="row mt-4">
+  <div class="col">
+    <table class="table table-striped">
+      <tbody>
+        <% tracks.forEach( (track, index)=> { %>
+          <tr>
+            <td>
+              <img src="<%= track.cover%>" alt="">
+            </td>
+            <td>
+              <%= track.title %>
+            </td>
+            <td>
+              <%= track.artist%>
+            </td>
+            <td>
+              <%= track.scrobbleDateString%>
+            </td>
+            <td>
+              <input class="form-check-input" type="checkbox" name="scrobbleCheckBox"
+                value="<%= JSON.stringify(track)%>" id="flexCheckDefault">
+            </td>
+          </tr>
+          <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<nav class="mt-2 mb-4">
+  <ul class="pagination">
+    <li class="page-item" id="prev-btn">
+      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+    </li>
+    <% for (let page=1; page <=numPages; page++) { %>
+      <li class="page-item"><a class="page-link" href="<%= page %>">
+          <%= page %>
+        </a></li>
+      <% } %>
+        <li class="page-item" id="next-btn">
+          <a class="page-link" href="2">Next</a>
+        </li>
+  </ul>
+</nav>
+
+<script>
+  onLoad()
+  let tracksToScrobble = [];
+
+  function onLoad() {
+    preparePagination();
+  }
+
+  function preparePagination() {
+    const page = parseInt(window.location.pathname.split('/').pop());
+    const nextPage = page + 1;
+    const prevPage = page - 1;
+
+    if (page == 1)
+      document.getElementById("prev-btn").classList.add("disabled");
+    else
+      document.getElementById("prev-btn").getElementsByClassName("page-link")[0].href = prevPage;
+
+    if (page == 3)
+      console.log("next = " + nextPage)
+    else
+      document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
+
+    currentPage = document.getElementsByClassName("page-item")[page]
+    currentPage.classList.add("active")
+  }
+
+  function addTrackToScrobble(track) {
+    tracksToScrobble.push(track);
+  }
+
+  function removeTrackToScrobble(track) {
+    tracksToScrobble = tracksToScrobble.filter(t => {
+      return t != track;
+    })
+  }
+
+  function deselectAllTracks() {
+    const checkBoxes = document.getElementsByName("scrobbleCheckBox");
+    checkBoxes.forEach(checkBox => {
+      checkBox.checked = false;
+    });
+  }
+
+  function selectAllTracks() {
+    const checkBoxes = document.getElementsByName("scrobbleCheckBox");
+    checkBoxes.forEach(checkBox => {
+      checkBox.checked = true;
+    });
+  }
+
+  async function scrobbleTracks() {
+    const checkBoxes = document.getElementsByName("scrobbleCheckBox");
+    let tracksToScrobble = []
+    checkBoxes.forEach(checkBox => {
+      if (checkBox.checked) {
+        const track = JSON.parse(checkBox.value)
+        tracksToScrobble.push({
+          artist: track.artist,
+          track: track.title,
+          timestamp: track.scrobbleDate
+        });
+      }
+    });
+
+    document.getElementById("scrobbleBtn").disabled = true;
+    document.getElementById("scrobbleText").style.display = "none";
+    document.getElementById("scrobbleSpinner").style.display = "block";
+    document.getElementById("scrobbleSuccess").style.display = "none";
+    document.getElementById("scrobbleError").style.display = "none";
+
+    try {
+      const response = await axios.put("/scrobbleBatch", tracksToScrobble)
+      const numScrobbled = response.data.scrobbles["@attr"].accepted;
+      document.getElementById("scrobbleSuccess").innerText = `Successfully scrobbled ${numScrobbled} tracks!`
+      document.getElementById("scrobbleSuccess").style.display = "block";
+    } catch (err) {
+      document.getElementById("scrobbleError").style.display = "block";
+    }
+    document.getElementById("scrobbleBtn").disabled = false;
+    document.getElementById("scrobbleText").style.display = "block";
+    document.getElementById("scrobbleSpinner").style.display = "none";
+  }
+</script>
+
+<style>
+  .avatarBig {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+  }
+</style>

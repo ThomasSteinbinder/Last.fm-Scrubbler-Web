@@ -1,1 +1,38 @@
-<h5 class="mt-3">available soon...</h5>
+<h5 class="my-4">Select friend to scrobble from:</h5>
+
+
+
+<div class="row">
+  <% friends.forEach(friend=> { %>
+    <div class="col-6 col-sm-4 col-md-3 col-xl-2 my-2">
+      <div class="text-center">
+        <a href="friendScrobble/<%= friend.name %>">
+          <img class="avatarBig" src="<%= friend.image[1]['#text'] ? friend.image[1]['#text'] : '/img/avatar.png' %>"
+            alt="alt">
+        </a>
+      </div>
+
+      <div class="text-center">
+        <%= friend.name %>
+      </div>
+
+    </div>
+
+    <% }); %>
+</div>
+
+
+
+<style>
+  .avatarBig {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+  }
+</style>
+
+<script>
+  function onFriendSelect(friendName) {
+    alert(friendName);
+  }
+</script>
