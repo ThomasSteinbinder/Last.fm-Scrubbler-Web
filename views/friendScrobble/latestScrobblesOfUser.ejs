@@ -85,8 +85,8 @@
     else
       document.getElementById("prev-btn").getElementsByClassName("page-link")[0].href = prevPage;
 
-    if (page == 3)
-      console.log("next = " + nextPage)
+    if (page == <%= numPages %>)
+      document.getElementById("next-btn").classList.add("disabled");
     else
       document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
 

@@ -53,9 +53,24 @@ server.get("/login", async (req, res) => {
   }
 })
 
-server.get("/home", auth.validateSession, (req, res) => {
+server.get("/home", auth.validateSession, async (req, res) => {
   const username = req.cookies.username;
-  res.render("home", { username: username });
+  const session_key = req.cookies.session_key;
+  const user = await auth.getLastFmUser(session_key);
+  const lastFm = auth.getLastFmObjectFrom(req);
+  const data = await lastFm.userGetRecentTracks({
+    user: req.cookies.username,
+    limit: 9
+  });
+  let tracks = [];
+  data.recenttracks.track.forEach(track => {
+    let trackModel = new Track(track);
+    tracks.push(trackModel)
+  });
+  res.render("home", {
+    user: user,
+    tracks: tracks
+  });
 })
 
 server.get("/me", auth.validateSession, async (req, res) => {

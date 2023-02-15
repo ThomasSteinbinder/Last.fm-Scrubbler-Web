@@ -1,6 +1,6 @@
 <p class="welcome mt-3">Welcome
   <b>
-    <%= username %>
+    <%= user.name %>
   </b>
 </p>
 
@@ -8,7 +8,9 @@
   <div class="col">
     <div class="mt-2 mt-sm-0 card text-center">
       <div class="card-body">
-        <h2 class="card-title text-blue" id="scrobbleLabel">?</h2>
+        <h2 class="card-title text-blue" id="scrobbleLabel">
+          <%= user.playcount %>
+        </h2>
         <i class="bi-music-note-beamed" style="font-size: 3rem; color: cornflowerblue;"></i>
         <p class="card-text">Scrobbles</p>
       </div>
@@ -17,7 +19,9 @@
   <div class="col">
     <div class="mt-2 mt-sm-0 card text-center">
       <div class="card-body">
-        <h2 class="card-title" id="albumLabel">?</h2>
+        <h2 class="card-title" id="albumLabel">
+          <%= user.album_count %>
+        </h2>
         <i class="bi-disc" style="font-size: 3rem; color: cornflowerblue;"></i>
         <p class="card-text">Albums</p>
       </div>
@@ -26,7 +30,9 @@
   <div class="col">
     <div class="mt-2 mt-sm-0 card text-center">
       <div class="card-body">
-        <h2 class="card-title" id="artistLabel">?</h2>
+        <h2 class="card-title" id="artistLabel">
+          <%= user.artist_count %>
+        </h2>
         <i class="bi-people-fill" style="font-size: 3rem; color: cornflowerblue;"></i>
         <p class="card-text">Artists</p>
       </div>
@@ -40,6 +46,26 @@
     <div class="col">
       <table class="table table-striped">
         <tbody id="scrobbleTable">
+          <% tracks.forEach( (track, index)=> { %>
+            <tr>
+              <td>
+                <img src="<%= track.cover%>" alt="">
+              </td>
+              <td>
+                <%= track.title %>
+              </td>
+              <td>
+                <%= track.artist%>
+              </td>
+              <td>
+                <%= track.scrobbleDateString%>
+              </td>
+              <td align="right">
+                <a href="<%= track.url %>" target="_blank"><i class="bi-arrow-up-right"
+                    style="font-size: 1.4rem; color: black;"></i></a>
+              </td>
+            </tr>
+            <% }); %>
         </tbody>
       </table>
     </div>
@@ -56,69 +82,6 @@
     onLoad()
 
     function onLoad() {
-      fillStats();
-      getLastTracks();
     }
 
-    function getLocalScrobbleDateString(track) {
-      const scrobbleDateUnix = track.date?.uts
-      if (!scrobbleDateUnix) {
-        if (track["@attr"]?.nowplaying) {
-          return "now playing...";
-        } else {
-          return "unavailable";
-        }
-      }
-      let scrobbleDate = new Date(scrobbleDateUnix * 1000);
-      const scrobbleDateLocal = timeUtils.localTime(scrobbleDate)
-      const scrobbleDateString = `${scrobbleDateLocal.toISOString().substring(0, 10)} ${scrobbleDateLocal.toISOString().substring(11, 16)}`
-      return scrobbleDateString;
-    }
-
-    async function getLastTracks() {
-      try {
-        const response = await axios.get(`${window.location.protocol}//${window.location.host}/latestTracks`);
-        const tracks = response.data.recenttracks.track;
-        const table = document.getElementById("scrobbleTable");
-        tracks.forEach(track => {
-          const scrobbleDate = getLocalScrobbleDateString(track);
-
-          var img = document.createElement('img');
-          img.src = track.image[0]["#text"];
-          let row = table.insertRow();
-
-          var cell1 = row.insertCell(0);
-          cell1.appendChild(img);
-          cell1.style = "width: 65px;"
-
-          var cell2 = row.insertCell(1);
-          cell2.innerHTML = track.name;
-          cell2.style = "width: 350px; max-width: 350px;"
-          cell2.class = "text-muted";
-
-          var cell3 = row.insertCell(2);
-          cell3.innerHTML = `<small class="text-muted">${track.artist["#text"]}</small>`;
-          cell3.style = "width: 350px; max-width: 350px;"
-
-          var cell4 = row.insertCell(3);
-          cell4.innerHTML = `<small class="text-muted">${scrobbleDate}</small>`;
-          cell4.style = "width: 350px; max-width: 350px;"
-
-          var cell5 = row.insertCell(4);
-          cell5.innerHTML = `<a href="${track.url}" target="_blank"><i class="bi-arrow-up-right" style="font-size: 1.4rem; color: black;"></i></a>`
-          cell5.style = "text-align: right;"
-        });
-      } catch (err) {
-        console.log(err)
-      }
-    }
-
-    function fillStats() {
-      let user = JSON.parse(cookies.getCookie('user'));
-      if (user) {
-        document.getElementById("scrobbleLabel").innerHTML = user.playcount;
-        document.getElementById("albumLabel").innerHTML = user.album_count;
-        document.getElementById("artistLabel").innerHTML = user.artist_count;
-      }
-    }
   </script>
