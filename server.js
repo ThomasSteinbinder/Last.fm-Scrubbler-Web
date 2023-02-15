@@ -87,7 +87,7 @@ server.get("/friendScrobble", auth.validateSession, async (req, res) => {
       user: req.cookies.username
     });
     //res.send(data.friends.user);
-    res.render("scrobbleFromFriend", {
+    res.render("friendScrobble/scrobbleFromFriend", {
       friends: data.friends.user
     });
   } catch (ex) {
@@ -119,7 +119,7 @@ server.get("/friendScrobble/:user/:page", auth.validateSession, async (req, res)
       ? 10
       : Math.ceil(friend.playcount / tracksPerPage);
 
-    res.render("latestScrobblesOfUser", {
+    res.render("friendScrobble/latestScrobblesOfUser", {
       user: friend,
       tracks: tracks,
       numPages: numPages

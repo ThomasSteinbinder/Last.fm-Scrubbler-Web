@@ -4,7 +4,7 @@
 </h4>
 
 <div class="mt-4">
-  <button class="btn" onclick="scrobbleTracks()" id="scrobbleBtn" style="background-color: #d92323; color: white;">
+  <button class="btn" disabled onclick="scrobbleTracks()" id="scrobbleBtn" style="background-color: #d92323; color: white;">
     <b id="scrobbleText">Scrobble selected tracks</b>
     <div id="scrobbleSpinner" style="display: none" class="spinner-border text-light" role="status">
       <span class="visually-hidden">Loading...</span>
@@ -41,7 +41,7 @@
             </td>
             <td>
               <input class="form-check-input" type="checkbox" name="scrobbleCheckBox"
-                value="<%= JSON.stringify(track)%>" id="flexCheckDefault">
+                value="<%= JSON.stringify(track)%>" id="flexCheckDefault" onchange="trackCheckedChanged()">
             </td>
           </tr>
           <% }); %>
@@ -93,14 +93,12 @@
     currentPage.classList.add("active")
   }
 
-  function addTrackToScrobble(track) {
-    tracksToScrobble.push(track);
-  }
-
-  function removeTrackToScrobble(track) {
-    tracksToScrobble = tracksToScrobble.filter(t => {
-      return t != track;
-    })
+  function trackCheckedChanged() {
+    if (getSelectedTracks().length > 0) {
+      document.getElementById("scrobbleBtn").disabled = false;
+    } else {
+      document.getElementById("scrobbleBtn").disabled = true;
+    }
   }
 
   function deselectAllTracks() {
@@ -108,6 +106,7 @@
     checkBoxes.forEach(checkBox => {
       checkBox.checked = false;
     });
+    document.getElementById("scrobbleBtn").disabled = true;
   }
 
   function selectAllTracks() {
@@ -115,9 +114,10 @@
     checkBoxes.forEach(checkBox => {
       checkBox.checked = true;
     });
+    document.getElementById("scrobbleBtn").disabled = false;
   }
 
-  async function scrobbleTracks() {
+  function getSelectedTracks() {
     const checkBoxes = document.getElementsByName("scrobbleCheckBox");
     let tracksToScrobble = []
     checkBoxes.forEach(checkBox => {
@@ -130,6 +130,11 @@
         });
       }
     });
+    return tracksToScrobble;
+  }
+
+  async function scrobbleTracks() {
+    const tracksToScrobble = getSelectedTracks();
 
     document.getElementById("scrobbleBtn").disabled = true;
     document.getElementById("scrobbleText").style.display = "none";

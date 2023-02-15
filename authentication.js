@@ -11,7 +11,6 @@ async function getLastFmUser(session_key, username = undefined) {
     }
     return user.user;
   } catch (err) {
-    console.log("oh boii...")
     return null;
   }
 }
