@@ -86,9 +86,15 @@ server.get("/friendScrobble", auth.validateSession, async (req, res) => {
     const data = await lastFm.userGetFriends({
       user: req.cookies.username
     });
-    //res.send(data.friends.user);
+    let friends = data.friends.user;
+    friends.sort(function (a, b) {
+      var nameA = a.name.toUpperCase();
+      var nameB = b.name.toUpperCase();
+      return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
+    });
+
     res.render("friendScrobble/scrobbleFromFriend", {
-      friends: data.friends.user
+      friends: friends
     });
   } catch (ex) {
     console.log(ex)
