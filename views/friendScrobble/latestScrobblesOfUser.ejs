@@ -37,8 +37,8 @@
             <td>
               <%= track.artist%>
             </td>
-            <td>
-              <%= track.scrobbleDateString%>
+            <td class="trackDateString">
+              <%= track.scrobbleDate%>
             </td>
             <td>
               <input class="form-check-input" type="checkbox" name="scrobbleCheckBox"
@@ -67,13 +67,23 @@
   </ul>
 </nav>
 
+<script src="/scripts/lastFmUtils.js"></script>
+
 <script>
   onLoad()
   let tracksToScrobble = [];
 
   function onLoad() {
     preparePagination();
+    showScrobbleDateString()
   }
+
+  function showScrobbleDateString() {
+      let dates = document.getElementsByClassName("trackDateString");
+      Array.from(dates).forEach(date => {
+        date.textContent = lastFmUtils.getlocalScrobbleDateString(date.textContent);
+      });
+    }
 
   function preparePagination() {
     const page = parseInt(window.location.pathname.split('/').pop());
