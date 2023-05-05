@@ -79,11 +79,11 @@
   }
 
   function showScrobbleDateString() {
-      let dates = document.getElementsByClassName("trackDateString");
-      Array.from(dates).forEach(date => {
-        date.textContent = lastFmUtils.getlocalScrobbleDateString(date.textContent);
-      });
-    }
+    let dates = document.getElementsByClassName("trackDateString");
+    Array.from(dates).forEach(date => {
+      date.textContent = lastFmUtils.getlocalScrobbleDateString(date.textContent);
+    });
+  }
 
   function preparePagination() {
     const page = parseInt(window.location.pathname.split('/').pop());
@@ -96,9 +96,9 @@
       document.getElementById("prev-btn").getElementsByClassName("page-link")[0].href = prevPage;
 
     if (page == <%= numPages %>)
-      document.getElementById("next-btn").classList.add("disabled");
+    document.getElementById("next-btn").classList.add("disabled");
     else
-      document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
+    document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
 
     currentPage = document.getElementsByClassName("page-item")[page]
     currentPage.classList.add("active")
@@ -159,6 +159,8 @@
       document.getElementById("scrobbleSuccess").innerText = `Successfully scrobbled ${numScrobbled} tracks!`
       document.getElementById("scrobbleSuccess").style.display = "block";
     } catch (err) {
+      document.getElementById("scrobbleError").textContent = err.response.data
+        ?? "Error scrobbling tracks!";
       document.getElementById("scrobbleError").style.display = "block";
     }
     document.getElementById("scrobbleBtn").disabled = false;
