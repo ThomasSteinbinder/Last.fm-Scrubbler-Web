@@ -38,7 +38,8 @@ server.get("/", (req, res) => {
 server.get("/login", async (req, res) => {
   const token = req.query.token;
   if (!token) {
-    res.render("error", { error: "Couldn't login" })
+    res.render("error", { error: "Couldn't login", layout: "layouts/index" })
+    return;
   }
   const api_signature = md5(`api_key${API_KEY}methodauth.getSessiontoken${token}${SECRET}`)
   try {
@@ -49,7 +50,7 @@ server.get("/login", async (req, res) => {
     res.redirect("home")
   } catch (err) {
     console.log(err)
-    res.render("error", { error: "Couldn't login" })
+    res.render("error", { error: "Couldn't login", layout: "layouts/index" })
   }
 })
 
