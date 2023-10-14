@@ -38,7 +38,8 @@ server.get("/", (req, res) => {
 server.get("/login", async (req, res) => {
   const token = req.query.token;
   if (!token) {
-    res.render("error", { error: "Couldn't login" })
+    res.render("error", { error: "Couldn't login", layout: "layouts/index" })
+    return;
   }
   const api_signature = md5(`api_key${API_KEY}methodauth.getSessiontoken${token}${SECRET}`)
   try {
@@ -49,7 +50,7 @@ server.get("/login", async (req, res) => {
     res.redirect("home")
   } catch (err) {
     console.log(err)
-    res.render("error", { error: "Couldn't login" })
+    res.render("error", { error: "Couldn't login", layout: "layouts/index" })
   }
 })
 
@@ -174,7 +175,7 @@ server.put("/scrobble", jsonParser, auth.validateSession, async (req, res) => {
     res.send("okay")
   } catch (err) {
     console.log(err);
-    res.sendStatus(400)
+    res.status(400).send("");
   }
 })
 
@@ -187,12 +188,12 @@ server.put("/scrobbleBatch", jsonParser, auth.validateSession, async (req, res) 
       scrobbleData
     );
     if (response.scrobbles["@attr"].accepted != scrobbleData.length) {
-      throw "scrobble not ok"
+      throw `Error scrobbing tracks. ${response.scrobbles["@attr"].ignored}/${scrobbleData.length} tracks got ignored.`
     }
     res.send(response);
   } catch (err) {
     console.log(err);
-    res.sendStatus(400)
+    res.status(400).send(err);
   }
 })
 

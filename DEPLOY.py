@@ -26,7 +26,6 @@ def pull_and_run():
     subprocess.call(["sudo", "docker", "pull", "cloud.canister.io:5000/thomassteinbinder/scrubbler"])
     print("Starting container...")
     subprocess.call(["sudo", "docker", "run", "--publish", "80:3000", "--env-file", "./.env", "-d", "cloud.canister.io:5000/thomassteinbinder/scrubbler"])
-    print("Pulling complete!")
     print("Container running!")
 
 

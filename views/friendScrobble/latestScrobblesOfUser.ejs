@@ -4,7 +4,7 @@
 </h4>
 
 <div class="mt-4">
-  <button class="btn" disabled onclick="scrobbleTracks()" id="scrobbleBtn"
+  <button class="btn" disabled onclick="checkTracksAndScrobble()" id="scrobbleBtn"
     style="background-color: #d92323; color: white;">
     <b id="scrobbleText">Scrobble selected tracks</b>
     <div id="scrobbleSpinner" style="display: none" class="spinner-border text-light" role="status">
@@ -37,8 +37,8 @@
             <td>
               <%= track.artist%>
             </td>
-            <td>
-              <%= track.scrobbleDateString%>
+            <td class="trackDateString">
+              <%= track.scrobbleDate%>
             </td>
             <td>
               <input class="form-check-input" type="checkbox" name="scrobbleCheckBox"
@@ -50,6 +50,36 @@
     </table>
   </div>
 </div>
+
+<div class="modal fade" id="tracksTooOldModal" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Some scrobbles are too old</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The following songs can't be scrobbled because they are too old:
+        <br> <br>
+        <code>
+          <div id="tracksTooOld"></div>
+        </code>
+        <br>
+        You can only scrobble up to 14 days in the past! <br>
+        How to proceed?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="scrobbleTracksIgnoreOld()">Ignore them</button>
+        <button type="button" class="btn btn-primary" onclick="scrobbleTracksWithCurrentDate()"
+          style="background-color: #d92323;"> Use current date</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
 <nav class="mt-2 mb-4">
   <ul class="pagination">
@@ -67,12 +97,20 @@
   </ul>
 </nav>
 
+<script src="/scripts/lastFmUtils.js"></script>
+
 <script>
   onLoad()
-  let tracksToScrobble = [];
-
   function onLoad() {
     preparePagination();
+    showScrobbleDateString()
+  }
+
+  function showScrobbleDateString() {
+    let dates = document.getElementsByClassName("trackDateString");
+    Array.from(dates).forEach(date => {
+      date.textContent = lastFmUtils.getlocalScrobbleDateString(date.textContent);
+    });
   }
 
   function preparePagination() {
@@ -86,9 +124,9 @@
       document.getElementById("prev-btn").getElementsByClassName("page-link")[0].href = prevPage;
 
     if (page == <%= numPages %>)
-      document.getElementById("next-btn").classList.add("disabled");
+    document.getElementById("next-btn").classList.add("disabled");
     else
-      document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
+    document.getElementById("next-btn").getElementsByClassName("page-link")[0].href = nextPage;
 
     currentPage = document.getElementsByClassName("page-item")[page]
     currentPage.classList.add("active")
@@ -134,9 +172,63 @@
     return tracksToScrobble;
   }
 
-  async function scrobbleTracks() {
-    const tracksToScrobble = getSelectedTracks();
+  function getTooOldTracks(tracks) {
+    tracksTooOld = []
+    tracks.forEach(track => {
+      let scrobbleDate = new Date(track.timestamp * 1000);
+      let maxAgeDate = new Date();
+      maxAgeDate.setDate(maxAgeDate.getDate() - 14);
+      if (scrobbleDate < maxAgeDate) {
+        tracksTooOld.push(track);
+      }
+    });
+    return tracksTooOld;
+  }
 
+
+  function checkTracksAndScrobble() {
+    let tracks = getSelectedTracks();
+    const tracksTooOld = getTooOldTracks(tracks);
+    let tracksMissingString = "";
+
+    tracksTooOld.forEach(track => {
+      tracksMissingString += `${track.artist} - ${track.track}<br>`;
+    });
+
+    if (tracksTooOld.length == 0) {
+      scrobbleTracks(tracks);
+    } else {
+      $("#tracksTooOld").html(tracksMissingString,);
+      $("#tracksTooOldModal").modal("show");
+    }
+  }
+
+  function scrobbleTracksWithCurrentDate() {
+    let tracks = getSelectedTracks();
+    tracks.forEach(track => {
+      let scrobbleDate = new Date(track.timestamp * 1000);
+      let maxAgeDate = new Date();
+      maxAgeDate.setDate(maxAgeDate.getDate() - 14);
+      if (scrobbleDate < maxAgeDate) {
+        track.timestamp = Math.floor(Date.now() / 1000);
+      }
+    });
+    $("#tracksTooOldModal").modal("hide");
+    scrobbleTracks(tracks);
+  }
+
+  function scrobbleTracksIgnoreOld() {
+    let tracks = getSelectedTracks().filter(track => {
+      let scrobbleDate = new Date(track.timestamp * 1000);
+      let maxAgeDate = new Date();
+      maxAgeDate.setDate(maxAgeDate.getDate() - 14);
+      return scrobbleDate > maxAgeDate;
+    });
+    $("#tracksTooOldModal").modal("hide");
+    scrobbleTracks(tracks);
+  }
+
+  async function scrobbleTracks(tracksToScrobble) {
     document.getElementById("scrobbleBtn").disabled = true;
     document.getElementById("scrobbleText").style.display = "none";
     document.getElementById("scrobbleSpinner").style.display = "block";
@@ -149,6 +241,8 @@
       document.getElementById("scrobbleSuccess").innerText = `Successfully scrobbled ${numScrobbled} tracks!`
       document.getElementById("scrobbleSuccess").style.display = "block";
     } catch (err) {
+      document.getElementById("scrobbleError").textContent = err.response.data
+        ?? "Error scrobbling tracks!";
       document.getElementById("scrobbleError").style.display = "block";
     }
     document.getElementById("scrobbleBtn").disabled = false;

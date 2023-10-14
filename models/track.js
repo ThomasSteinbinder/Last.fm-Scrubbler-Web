@@ -5,7 +5,6 @@ module.exports = class Track {
     this.cover = track.image[0]['#text'];
     this.url = track.url;
     this.scrobbleDate = track.date ? track.date.uts : 0;
-    this.scrobbleDateString = this.getlocalScrobbleDateString(track);
   }
 
   getlocalScrobbleDateString(track) {
